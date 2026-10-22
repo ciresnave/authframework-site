@@ -84,3 +84,11 @@ was observed instead of the README's text. Result is recorded in the site PR, no
 - CireSnave: Cloudflare Pages click-through (project name `authframework-site`), then `dns-pages`/`pages-domains` equivalents for
   the `authframework.dev` zone. `plan.mjs` here is specific to the three foundation domains; the new zone gets its own steps.
 - Whether the footer names CireSnave and an address: the site shows only what `SECURITY.md` and `Cargo.toml` already publish.
+
+## Naming (AuthAnt rename pending, approved 2026-10-21)
+
+`auth-framework` is to be renamed AuthAnt after the security advisory work. Until then no brand copy is final. The site keeps
+every name in ONE config module (`src/config.ts`) as separate fields: `productName`, `domain`, `repoUrl`, `crateName`, `crateVersionPin`.
+Pages read these fields; no page hard-codes them. Crate name, repo URL, advisory links and version pins are identifiers, not brand:
+published versions stay under the old crate name. Today's hard-coded set is `authframework.dev`, `authframework-site` (repo and
+Cloudflare project), `auth-framework` (crate, repo URL, advisory API paths).
