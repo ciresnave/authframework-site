@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config.ts';
+import { advisories } from '../lib/advisories.ts';
+const list = await advisories();
+---
+<Base title="Security" description={`Published security advisories for ${SITE.crateName}.`}>
+  <h1>Security</h1>
+  <h2>Advisories</h2>
+  {list.length === 0
+    ? <p data-claim="security-advisories">No advisory is published for this repository at build time.</p>
+    : (
+      <ul>
+        {list.map((a) => (
+          <li data-claim="security-advisories"><a href={a.url}>{a.id}</a>: {a.summary} (severity: {a.severity}, published {a.published})</li>
+        ))}
+      </ul>
+    )}
+  <h2>Reporting a vulnerability</h2>
+  <p data-claim="security-reporting">
+    Report a vulnerability by the route in the <a href={`${SITE.repoUrl}/blob/main/SECURITY.md`}>SECURITY.md</a> of the
+    repository, not in a public issue.
+  </p>
+</Base>

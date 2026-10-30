@@ -1,0 +1,9 @@
+# Cloudflare Pages security headers, applied to every route. Same shape as the sibling site.
+# This site has no scripts and every stylesheet is a file, so 'self' is enough;
+# tests/security.spec.ts fails if the built HTML ever needs an inline script or style.
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
+  Content-Security-Policy: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'; form-action 'none'

@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config.ts';
+import { crateInfo } from '../lib/crates.ts';
+const c = await crateInfo();
+---
+<Base title="Maturity" description={`Which published ${SITE.crateName} lines are stable and which are release candidates.`}>
+  <h1>Maturity</h1>
+  <p data-claim="maturity-lines">
+    {c.maxStable
+      ? <>The newest stable version on crates.io is <code>{c.maxStable}</code>.</>
+      : <>No stable version has been published to crates.io.</>}
+    {' '}Every other line below is a release candidate unless marked stable.
+  </p>
+  <table>
+    <caption data-claim="maturity-lines">Newest un-yanked version per line, read from crates.io when this site was built</caption>
+    <thead><tr data-claim="maturity-lines"><th scope="col">Line</th><th scope="col">Newest version</th><th scope="col">Kind</th></tr></thead>
+    <tbody>
+      {c.lines.map((l) => (
+        <tr data-claim="maturity-lines"><td>{l.line}</td><td><code>{l.newest}</code></td><td>{l.stable ? 'stable' : 'release candidate'}</td></tr>
+      ))}
+    </tbody>
+  </table>
+  {c.docsLinks.length > 0 && (
+    <>
+      <h2>Documentation</h2>
+      <ul>
+        {c.docsLinks.map((d) => <li data-claim="docs-links"><a href={d.href}>docs.rs, {d.version}</a></li>)}
+      </ul>
+    </>
+  )}
+</Base>
