@@ -5,6 +5,8 @@ breaking-change number. The PM allocates the number at gate time.
 
 ## 0.1.0
 
+- (fixed before merge) long advisory text no longer overflows at 360px wide.
+
 - Astro scaffold per `docs/DESIGN.md`: home, maturity and security pages, a 404, and `src/config.ts` as the one
   place names live. Versions and the advisory list are read from crates.io and the GHSA API at build time; the
   build fails if either cannot be read.

@@ -4,6 +4,7 @@
 body{margin:0;background:var(--bg);color:var(--text);font:1rem/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
 .wrap{max-width:var(--wrap);margin:0 auto;padding:0 1rem}
 a{color:var(--link)}
+main,li,p{overflow-wrap:anywhere}
 header.site,footer.site{border-bottom:1px solid var(--line);padding:1rem 0}
 footer.site{border-bottom:0;border-top:1px solid var(--line);color:var(--muted);margin-top:3rem}
 header.site .wrap{display:flex;flex-wrap:wrap;gap:1rem;align-items:baseline;justify-content:space-between}
