@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config.ts';
+import { crateInfo } from '../lib/crates.ts';
+const c = await crateInfo();
+---
+<Base description={c.description}>
+  <h1>{SITE.productName}</h1>
+  <p data-claim="home-description">{c.description}</p>
+  <p data-claim="home-licence">Licence: {c.license}.</p>
+  {c.rustVersion && <p data-claim="home-rust-version">Minimum supported Rust version of {c.current}: {c.rustVersion}.</p>}
+  <p data-claim="maturity-lines">The newest published version is <code>{c.current}</code>. See <a href="/maturity">Maturity</a> for which lines are stable and which are release candidates.</p>
+</Base>

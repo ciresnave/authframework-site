@@ -1,0 +1,112 @@
+name: CI
+
+# Four HARD gates, one job each, so each job name can be a required check on its own
+# (docs/DESIGN.md "Site mechanics"). A job that dies early asserts nothing about its later
+# steps while its name goes on claiming otherwise.
+#
+#   1. Tree-freshness guard -- tests/freshness.spec.ts (the guard's decision table plus an
+#                              end-to-end run; a CI checkout is detached, so the guard itself
+#                              would print "NOT VERIFIED" and pass whatever its code said)
+#   2. Type check           -- `astro check`
+#   3. Build                -- `astro build`; reads crates.io and the GHSA API and FAILS if
+#                              either cannot be read (DESIGN: never fall back to a stale number)
+#   4. Playwright + axe     -- the full suite, including the claims test, against the built site
+#
+# The repo is public, so hosted runners are free (DESIGN). pull_request and push to main run
+# the same jobs. No secrets; GITHUB_TOKEN is read-only and only raises the GHSA API rate limit.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  freshness:
+    name: Tree-freshness guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Guard decision + end-to-end fixture (tests/freshness.spec.ts)
+        run: npx playwright test tests/freshness.spec.ts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  check:
+    name: Type check (astro check)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+
+  build:
+    name: Build (astro build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  test:
+    name: Playwright + axe
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # `npx playwright test`, not `npm test`: the pretest hook runs the freshness guard,
+      # which is "NOT VERIFIED" on a detached CI checkout. Job 1 covers the guard.
+      - name: Playwright suite, including axe and the claims test
+        run: npx playwright test
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload the Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  # ADVISORY, not a required check (CireSnave 2026-10-23: "Roll out advisory-only, non-blocking
+  # CodeRipper checks everywhere."). Do not add it to branch protection.
+  portfolio:
+    name: Portfolio checks (advisory)
+    permissions:
+      contents: read
+    uses: ciresnave/coderipper/.github/workflows/portfolio.yml@83585ae3e7ff321031d7497bb9eda81a90f4765f # 0.10.0
+    with:
+      runs-on: ubuntu-latest
