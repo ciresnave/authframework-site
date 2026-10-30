@@ -7,23 +7,22 @@ exists. Nothing on the site is written until its source is in the table below.
 
 A small static Astro site on Cloudflare Pages (P2, Git integration; project `authframework-site`; CireSnave does the
 dashboard click-through) that describes the `auth-framework` crate. **It describes the published crate, not `main`.** Facts
-below were read on 2026-10-17 from `ciresnave/auth-framework` `origin/main` (0.6.0-rc74, unpublished) and, where a claim is
-about what a user gets, from the **published rc73 tarball** (`static.crates.io/crates/auth-framework/auth-framework-0.6.0-rc73.crate`).
+below were first read on 2026-10-17 from `ciresnave/auth-framework` `origin/main` and, where a claim is about what a user gets,
+from a **published tarball** (`static.crates.io/crates/auth-framework/auth-framework-<version>.crate`). The 2026-10-17 reads
+(rc73 tarball) are stale for versions and security; those two areas are rebuilt from live APIs as described below, and every
+other row is re-read against the then-newest published tarball before site code.
 
 **No hosted-service claim**, no "sandbox", no "coming soon", no performance, no compliance, no adoption numbers. The sandbox
 and any production service are later stages of board 228 and get their own pages only after they exist.
 
-## Versions the site may name (crates.io, API read 2026-10-17)
+## Versions the site may name
 
-| Line | Version | Note |
-|---|---|---|
-| stable | `0.4.28` | `max_stable_version`; patched for both advisories |
-| rc | `0.5.0-rc49` | patched for GHSA-9r7g-3hh2-8x65 |
-| rc | `0.6.0-rc73` | newest published; `0.6.0-rc69` is **yanked** |
+No version number is copied by hand into this note or the site. Every version string is **read from the crates.io API at build
+time** (newest stable, newest release candidate per line, and which versions are yanked) and rendered from that response; a
+yanked version is never offered. The build fails if the API cannot be read, rather than falling back to a stale number.
 
-`main` is `0.6.0-rc74` (a test/CI-only change, CHANGELOG), which is not on crates.io. The site never names rc74 as available.
-Version strings on the site come from one data file so a release is a one-line change; a CI check compares it with the crates.io
-API response.
+Rule kept: the site describes the **published crate, never `main`**. A version that is on `main` but not on crates.io is never
+named as available.
 
 ## Pages and the source behind each claim
 
@@ -32,16 +31,16 @@ API response.
 | Home | One sentence: an authentication and authorization framework for Rust, library plus an optional OAuth 2.0 / OIDC server; currently a release-candidate line | `Cargo.toml` `description`; README banner line ends "Release candidate"; its intro says that, as an active release candidate, it should be validated against your environment, storage, TLS and operational requirements (main) |
 | Home | Licence MIT OR Apache-2.0 | `Cargo.toml` `license`; `LICENSE-MIT`, `LICENSE-APACHE` in the rc73 tarball |
 | Home | Rust 1.95+, edition 2024 | `Cargo.toml` `rust-version`, `edition` (rc73 tarball) |
-| Maturity | 0.4.x is the newest stable line; 0.5 and 0.6 are release candidates; **not 1.0** | crates.io `max_stable_version` = 0.4.28; README "The 0.4.x line is the newest stable release; `main` is on 0.6.0" |
-| Maturity | Advisories exist and are fixed by the versions above | Both GHSAs, read through the API (below) |
+| Maturity | Which line is newest stable and which are release candidates; **not 1.0** unless the API says so | crates.io `max_stable_version` and version list, read at build time |
 | Features | The protocol list, each row linked to its module path and feature flag | `PROTOCOLS.md` in the rc73 tarball. **Checked:** all 34 module paths it names exist in the rc73 tarball (0 missing; a nonexistent path is absent, as control) |
 | Features | Storage backends: PostgreSQL (default), SQLite, Redis, tiered | `FEATURE_FLAGS.md`, `Cargo.toml` `[features]` |
 | Features | Web integrations: Axum, Actix-web, Warp | `FEATURE_FLAGS.md` "Web Framework Integrations" |
 | Features | SAML is Linux/macOS only for now | `FEATURE_FLAGS.md` `saml` row (issue 106 linked there) |
-| Security | The two published advisories, linked, with severity and the patched version per line | GHSA-7jcf-r8rm-w7vc (low; patched 0.4.22 / 0.5.0-rc45 / 0.6.0-rc69) and GHSA-9r7g-3hh2-8x65 (high; patched 0.4.28 / 0.5.0-rc49 / 0.6.0-rc73), `GET /repos/ciresnave/auth-framework/security-advisories/<id>`, both `state: published` |
+| Security | The advisory list, linked, with severity | Rendered from the GHSA API at build time (`GET /repos/ciresnave/auth-framework/security-advisories`, `state: published` only). No advisory is listed, named or linked from a snapshot in this note or the source: more are being prepared and are not public yet |
+| Security | Which versions are fixed | Nothing until each line's fixed version is read back from the advisory. Until then the page has **no sentence about which lines are safe or patched** |
 | Security | How to report: email, not a public issue | `SECURITY.md` "Reporting Security Vulnerabilities" (the address printed there) |
 | Install | Cargo dependency line and a minimal program | **Run before it is written** (below) |
-| Docs | Links: docs.rs, CHANGELOG, repository, crates.io | docs.rs returns 200 for 0.4.28, 0.5.0-rc49, 0.6.0-rc73 (read 2026-10-17) |
+| Docs | Links: docs.rs, CHANGELOG, repository, crates.io | docs.rs link per version the build names; build checks each returns 200 |
 
 ## Words the site will not copy from the README, and why
 
@@ -52,18 +51,20 @@ API response.
   protocol modules finds only test fixtures and a doc example, which says nothing about completeness; the site does not claim it.
 - "35+ protocols": a count in prose. The site shows the table's rows, and a number only if it is computed from the file at build
   time (the file's tables mix protocols with header and separator rows, so a hand count is easy to get wrong).
-- The README's install one-liners and `docker run ... :0.6.0-rc41`: the Docker image is in the advisory's vulnerable range
-  (`< 0.6.0-rc73`) and `install.sh` / `install.ps1` pipe `main` into a shell. Not run, so not documented.
+- The README's install one-liners and `docker run ... :0.6.0-rc41`: the Docker image is a pinned old version inside a
+  known-affected range, and `install.sh` / `install.ps1` pipe `main` into a shell. Not run, so not documented.
 - Test counts ("1,900+ tests"): the README itself says its recorded results are a historical rc18 snapshot.
-- Supported-versions table: `SECURITY.md` says 0.5.x is supported and 0.4.x is not, yet GHSA-9r7g patches 0.4.28. These
-  disagree, so the site states no support matrix and links `SECURITY.md`. **Raised to the PM as a finding.**
+- Supported-versions table: resolved upstream. `SECURITY.md` on auth-framework `main` now has a Supported versions section
+  (latest line fixed, older lines backported when small, no support period promised). The site links `SECURITY.md` and states
+  **no support matrix**.
 
 ## Install and quickstart: run first
 
 The README's Basic Usage program (`AuthConfig`, `register_method`, `create_auth_token`, `validate_token`) is built and run in a
-scratch project against `auth-framework = "=0.6.0-rc73"` before it appears. Its README dependency line says `0.6.0-rc50`, which
-is inside the high-severity advisory's vulnerable range; the site pins a patched version. The page shows the exact command,
-the exact output, the Rust version, and the OS it ran on, or it says it did not run. If it does not build, the page says what
+scratch project against the **newest published patched version, determined at build time** (never a number copied here; rc73 is
+no longer the newest and falls inside newly found affected ranges) before it appears. The README's own dependency line is
+stale and is not copied. The quickstart is rerun on the version the build pins before the page shows it. The page shows the
+exact command, the exact output, the Rust version, and the OS it ran on, or it says it did not run. If it does not build, the page says what
 was observed instead of the README's text. Result is recorded in the site PR, not here.
 
 ## Site mechanics (follows ThinkersFoundation-site)
