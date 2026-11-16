@@ -1,7 +1,7 @@
 {
   "name": "authframework-site",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -17,7 +17,7 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "astro": "^7.3.8"
+    "astro": "^7.4.7"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
