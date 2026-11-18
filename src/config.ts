@@ -14,6 +14,7 @@ export const SITE = {
 };
 
 export const NAV: { label: string; href: string }[] = [
+  { label: 'Features', href: '/features' },
   { label: 'Maturity', href: '/maturity' },
   { label: 'Security', href: '/security' },
 ];

@@ -37,6 +37,6 @@ test('no CSP-violating console messages while browsing every page', async ({ pag
   page.on('console', (m) => {
     if (/content security policy|refused to/i.test(m.text())) problems.push(m.text());
   });
-  for (const r of ['/', '/maturity', '/security']) await page.goto(r);
+  for (const r of ['/', '/features', '/maturity', '/security']) await page.goto(r);
   expect(problems).toEqual([]);
 });

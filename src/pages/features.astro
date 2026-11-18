@@ -1,0 +1,54 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config.ts';
+import { crateInfo } from '../lib/crates.ts';
+import { features } from '../lib/tarball.ts';
+const c = await crateInfo();
+const f = await features(c.current);
+const src = (p: string) => `https://docs.rs/crate/${SITE.crateName}/${c.current}/source/${p}`;
+// Flags are named only when the published Cargo.toml defines them.
+const present = (names: string[]) => names.filter((n) => f.flags.includes(n));
+const storage = present(['postgres-storage', 'sqlite-storage', 'redis-storage', 'tiered-storage']);
+const web = present(['axum-integration', 'actix-integration', 'warp-integration']);
+const isDefault = (n: string) => f.defaultFlags.includes(n);
+---
+<Base title="Features" description={`Protocols and feature flags in the published ${SITE.crateName} ${c.current}.`}>
+  <h1>Features</h1>
+  <p data-claim="features-protocols">
+    Read from the published tarball of <code>{c.current}</code>, not from the development branch. The table lists what is
+    present in that crate; it is not a statement that any row is ready for production, and the crate is a release candidate
+    to be validated against your own environment first.
+  </p>
+  <h2>Protocols</h2>
+  <table>
+    <caption data-claim="features-protocols">{f.protocols.length} rows from <code>PROTOCOLS.md</code> in {c.current}</caption>
+    <thead><tr data-claim="features-protocols"><th scope="col">Protocol</th><th scope="col">Standard</th><th scope="col">Module</th><th scope="col">Feature flag</th></tr></thead>
+    <tbody>
+      {f.protocols.map((r) => (
+        <tr data-claim="features-protocols">
+          <td>{r.protocol}</td>
+          <td>{r.standard}</td>
+          <td>{r.module.startsWith('src/') ? <a href={src(r.module)}><code>{r.module}</code></a> : r.module}</td>
+          <td>{r.flag ? <code>{r.flag}</code> : ''}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  {f.samlNote && <p data-claim="features-saml">The <code>saml</code> feature: {f.samlNote}.</p>}
+  {storage.length > 0 && (
+    <>
+      <h2>Storage backends</h2>
+      <ul>
+        {storage.map((n) => <li data-claim="features-storage"><code>{n}</code>{isDefault(n) ? ' (enabled by default)' : ''}</li>)}
+      </ul>
+    </>
+  )}
+  {web.length > 0 && (
+    <>
+      <h2>Web integrations</h2>
+      <ul>
+        {web.map((n) => <li data-claim="features-web"><code>{n}</code></li>)}
+      </ul>
+    </>
+  )}
+</Base>
