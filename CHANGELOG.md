@@ -3,6 +3,13 @@
 Versions follow the portfolio rule: every pushed change bumps the version; pre-1.0 the second number is the
 breaking-change number. The PM allocates the number at gate time.
 
+## 0.1.4 - 2026-11-18
+
+Number provisional: waiting for the PM's allocation line before the merge.
+
+- Install page (`/install`), from the recorded quickstart run in `docs/recordings/`: the commands, the README's program unchanged, what it printed (`Token is valid!` only; the permission line did not print, shown without a guess at why), and the README's own pinned dependency line failing to resolve. No crate version is written on the page. Two claim ids added (`install-*`); DESIGN Install row replaced.
+- `tests/install.spec.ts` pins that: no `rc` version string other than the README's quoted pin, the recorded output present, and the redacted recording holds no home-directory path.
+
 ## 0.1.3 - 2026-11-18
 
 Number provisional until the PM allocates it at the gate.

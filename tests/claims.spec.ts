@@ -44,7 +44,7 @@ const BANNED: RegExp[] = [
 ];
 
 test('the build produced the pages this spec reads (positive control)', () => {
-  expect(pages.map(rel)).toEqual(expect.arrayContaining(['/index.html', '/features/index.html', '/maturity/index.html', '/security/index.html', '/404.html']));
+  expect(pages.map(rel)).toEqual(expect.arrayContaining(['/index.html', '/features/index.html', '/install/index.html', '/maturity/index.html', '/security/index.html', '/404.html']));
 });
 
 test('the scanner flags a deliberately untagged fact line (control)', () => {
