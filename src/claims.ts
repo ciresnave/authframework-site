@@ -10,6 +10,10 @@ export const CLAIMS = [
   'security-advisories',
   'security-reporting',
   'docs-links',
+  'features-protocols',
+  'features-storage',
+  'features-web',
+  'features-saml',
   // Interface text that states no fact about the crate. Allowed only on /404 (tests/claims.spec.ts).
   'ui',
 ] as const;

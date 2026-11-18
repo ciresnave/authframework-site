@@ -32,10 +32,10 @@ named as available.
 | Home | Licence MIT OR Apache-2.0 | `Cargo.toml` `license`; `LICENSE-MIT`, `LICENSE-APACHE` in the rc73 tarball |
 | Home | Rust 1.95+, edition 2024 | `Cargo.toml` `rust-version`, `edition` (rc73 tarball) |
 | Maturity | Which line is newest stable and which are release candidates; **not 1.0** unless the API says so | crates.io `max_stable_version` and version list, read at build time |
-| Features | The protocol list, each row linked to its module path and feature flag | `PROTOCOLS.md` in the rc73 tarball. **Checked:** all 34 module paths it names exist in the rc73 tarball (0 missing; a nonexistent path is absent, as control) |
-| Features | Storage backends: PostgreSQL (default), SQLite, Redis, tiered | `FEATURE_FLAGS.md`, `Cargo.toml` `[features]` |
-| Features | Web integrations: Axum, Actix-web, Warp | `FEATURE_FLAGS.md` "Web Framework Integrations" |
-| Features | SAML is Linux/macOS only for now | `FEATURE_FLAGS.md` `saml` row (issue 106 linked there) |
+| Features (`features-protocols`) | The protocol list, each row linked to its module path (docs.rs source view of the named version) and feature flag; the row count is computed, never typed | `PROTOCOLS.md` in the tarball of the version the site names, read at build time. **Checked at build:** every `src/` module path it names must exist in that tarball or the build fails (a nonexistent path is absent, as control, in `tests/tarball.spec.ts`) |
+| Features (`features-storage`) | Storage backends: the `postgres-storage`, `sqlite-storage`, `redis-storage`, `tiered-storage` flags, each named only if that tarball's `Cargo.toml` `[features]` defines it, with "enabled by default" only if `default` lists it | `Cargo.toml` `[features]` (`FEATURE_FLAGS.md` is not in the rc217 tarball, so it is no longer a source) |
+| Features (`features-web`) | Web integrations: the `axum-integration`, `actix-integration`, `warp-integration` flags, same rule | `Cargo.toml` `[features]` |
+| Features (`features-saml`) | SAML is Linux/macOS only for now | the "Feature Flags Reference" `saml` line of `PROTOCOLS.md`; stated only if that line says so |
 | Security | The advisory list, linked, with severity | Rendered from the GHSA API at build time (`GET /repos/ciresnave/auth-framework/security-advisories`, `state: published` only). No advisory is listed, named or linked from a snapshot in this note or the source: more are being prepared and are not public yet |
 | Security | Which versions are fixed | Nothing until each line's fixed version is read back from the advisory. Until then the page has **no sentence about which lines are safe or patched** |
 | Security | How to report: email, not a public issue | `SECURITY.md` "Reporting Security Vulnerabilities" (the address printed there) |
