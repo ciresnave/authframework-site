@@ -39,7 +39,8 @@ named as available.
 | Security | The advisory list, linked, with severity | Rendered from the GHSA API at build time (`GET /repos/ciresnave/auth-framework/security-advisories`, `state: published` only). No advisory is listed, named or linked from a snapshot in this note or the source: more are being prepared and are not public yet |
 | Security | Which versions are fixed | Nothing until each line's fixed version is read back from the advisory. Until then the page has **no sentence about which lines are safe or patched** |
 | Security | How to report: email, not a public issue | `SECURITY.md` "Reporting Security Vulnerabilities" (the address printed there) |
-| Install | Cargo dependency line and a minimal program | **Run before it is written** (below) |
+| Install (`install-recording`) | The commands, the README "Basic Usage" program unchanged, and what the run printed, with date, Rust and cargo versions, OS. **No crate version is written**: the page says `cargo add auth-framework` | A recorded run by the auth-framework lane, 2026-11-18, kept at `docs/recordings/QUICKSTART-RECORDING-2026-11-18.txt` (only edit: a local home-directory path removed). It printed only `Token is valid!`; the permission line the program also checks did not print, and the page says so without explaining why |
+| Install (`install-readme`) | The README's own dependency line failed to resolve when tried exactly as written (shown with cargo's output, repeated yanked-release lines elided and marked) | Run B of the same recording. The page does not call the README wrong beyond what the output shows |
 | Docs | Links: docs.rs, CHANGELOG, repository, crates.io | docs.rs link per version the build names; build checks each returns 200 |
 
 ## Words the site will not copy from the README, and why

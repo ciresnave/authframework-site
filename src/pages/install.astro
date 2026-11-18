@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config.ts';
+import program from '../data/quickstart-main.rs.txt?raw';
+// Everything below is a RECORDED run (docs/recordings/QUICKSTART-RECORDING-2026-11-18.txt;
+// docs/DESIGN.md "Install and quickstart: run first"). No version of the crate is written
+// here: the page says `cargo add`, and the newest published version is on /maturity.
+const README = `${SITE.repoUrl}/blob/a7f664f5/README.md#L341-L389`;
+const commands = ['cargo new qs', `cargo add ${SITE.crateName}`, 'cargo add tokio --features full', 'cargo build', 'cargo run'].join('\n');
+const failure = [
+  'error: failed to select a version for the requirement `auth-framework = "^0.6.0-rc85"`',
+  '  version 0.6.0-rc85 is yanked',
+  '  [3 more lines, each naming another yanked release, omitted here]',
+  'location searched: crates.io index',
+  'exit=101',
+].join('\n');
+---
+<Base title="Install" description={`A recorded run of the ${SITE.crateName} quickstart, including what does not work today.`}>
+  <h1>Install</h1>
+  <p data-claim="install-recording">
+    This page shows one recorded run, made on 2026-11-18 on Windows with rustc 1.100.0 and cargo 1.100.0, in a new
+    <code>cargo new</code> project, against the newest published release at that time. It is not a promise about any
+    other version or system; run it yourself before relying on it.
+  </p>
+  <h2>The commands</h2>
+  <pre tabindex="0"><code set:text={commands} /></pre>
+  <p data-claim="install-recording">
+    <code>cargo add</code> wrote the crate's dependency line itself, so no version is typed by hand. The build ran with
+    the compiler wrapper turned off, because a local build cache failed the first time; that was unrelated to the crate.
+  </p>
+  <h2>The program</h2>
+  <p data-claim="install-recording">
+    The program is the "Basic Usage" snippet from the repository <a href={README}>README</a>, copied unchanged into
+    <code>src/main.rs</code>. That README describes the development branch, not the published crate.
+  </p>
+  <pre tabindex="0"><code set:text={program} /></pre>
+  <h2>What happened</h2>
+  <ul>
+    <li data-claim="install-recording"><code>cargo build</code> succeeded (exit 0).</li>
+    <li data-claim="install-recording"><code>cargo run</code> succeeded (exit 0) and printed exactly one line: <code>Token is valid!</code></li>
+    <li data-claim="install-recording">The program also checks a permission and would print <code>User has permission to read documents</code>. That line did not appear. This recording does not show why, so the sample does not demonstrate that access was granted.</li>
+  </ul>
+  <h2>What does not work today</h2>
+  <p data-claim="install-readme">
+    The README's own dependency line, <code>auth-framework = "0.6.0-rc85"</code>, did not resolve when tried exactly as
+    written: cargo refused to select a version and reported the releases it found as yanked. Output:
+  </p>
+  <pre tabindex="0"><code set:text={failure} /></pre>
+  <p data-claim="install-readme">Use <code>cargo add {SITE.crateName}</code> as above, not the README's pinned line.</p>
+</Base>

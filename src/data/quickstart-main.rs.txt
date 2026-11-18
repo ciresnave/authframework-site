@@ -1,0 +1,49 @@
+use auth_framework::{AuthFramework, AuthConfig};
+use auth_framework::methods::{JwtMethod, AuthMethodEnum};
+use std::time::Duration;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Set environment for development/testing (allows memory storage)
+    // SAFETY: Must not be called concurrently with other env mutations.
+    unsafe { std::env::set_var("ENVIRONMENT", "development"); }
+
+    // Configure the auth framework with required JWT secret
+    let jwt_secret = std::env::var("JWT_SECRET")
+        .unwrap_or_else(|_| "your-secure-jwt-secret-at-least-32-characters-long".to_string());
+
+    let config = AuthConfig::new()
+        .token_lifetime(Duration::from_secs(3600))
+        .refresh_token_lifetime(Duration::from_secs(86400 * 7))
+        .secret(jwt_secret);
+
+    // Create the auth framework (storage is handled internally)
+    let mut auth = AuthFramework::new(config);
+
+    // Register the JWT method marker. AuthFramework validates JWTs with the
+    // configured TokenManager when `authenticate("jwt", ...)` is called.
+    auth.register_method("jwt", AuthMethodEnum::Jwt(JwtMethod::new()));
+
+    // Initialize the framework
+    auth.initialize().await?;
+
+    // Create a JWT token for testing
+    let token = auth.create_auth_token(
+        "user123",
+        vec!["read".to_string(), "write".to_string()],
+        "jwt",
+        None,
+    ).await?;
+
+    // Validate the token
+    if auth.validate_token(&token).await? {
+        println!("Token is valid!");
+
+        // Check permissions
+        if auth.check_permission(&token, "read", "documents").await? {
+            println!("User has permission to read documents");
+        }
+    }
+
+    Ok(())
+}

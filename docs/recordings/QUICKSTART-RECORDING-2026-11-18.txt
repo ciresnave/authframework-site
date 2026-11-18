@@ -1,0 +1,143 @@
+# Redacted copy kept as the source for /install. Recorded by the auth-framework lane (via the PM); the only edit is removal of a local home-directory path.
+# auth-framework cargo quickstart recording, 2026-11-18 (lane: auth-framework)
+# README snippet = origin/main:README.md lines 341-389 (origin/main a7f664f5), verbatim in src/main.rs
+
+=== RUN A: latest published (cargo add) ===
+## date
+Wed Nov 18 14:27:52 UTC 2026
+rustc 1.100.0 (0ef1bc386 2026-11-09)
+cargo 1.100.0 (3acc79c0c 2026-11-05)
+## cargo new qs
+    Creating binary (application) `qs` package
+note: see more `Cargo.toml` keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+## cargo add auth-framework (prerelease: latest is rc, needs explicit)
+    Updating crates.io index
+      Adding auth-framework v0.6.0-rc217 to dependencies
+             Features:
+             + api-server
+             + axum
+             + enhanced-rbac
+             + postgres-storage
+             + role-system
+             + tokio-postgres
+             + tower
+             + tower-http
+             74 deactivated features
+    Updating crates.io index
+     Locking 463 packages to highest Rust 1.100.0 compatible versions
+      Adding generic-array v0.14.7 (available: v0.14.9)
+      Adding matchit v0.8.4 (available: v0.8.6)
+## cargo add tokio --features full
+    Updating crates.io index
+      Adding tokio v1.54.1 to dependencies
+             Features:
+             + bytes
+             + fs
+             + full
+             + io-std
+             + io-util
+             + libc
+             + macros
+             + net
+             + parking_lot
+             + process
+             + rt
+             + rt-multi-thread
+             + signal
+             + signal-hook-registry
+             + socket2
+             + sync
+             + time
+             + tokio-macros
+             - io-uring
+             - mio
+             - schedule-latency
+             - taskdump
+             - test-util
+             - tracing
+             - windows-sys
+## Cargo.toml
+[package]
+name = "qs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+auth-framework = "0.6.0-rc217"
+tokio = { version = "1.54.1", features = ["full"] }
+
+## src/main.rs
+use auth_framework::{AuthFramework, AuthConfig};
+use auth_framework::methods::{JwtMethod, AuthMethodEnum};
+use std::time::Duration;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Set environment for development/testing (allows memory storage)
+    // SAFETY: Must not be called concurrently with other env mutations.
+    unsafe { std::env::set_var("ENVIRONMENT", "development"); }
+
+    // Configure the auth framework with required JWT secret
+    let jwt_secret = std::env::var("JWT_SECRET")
+        .unwrap_or_else(|_| "your-secure-jwt-secret-at-least-32-characters-long".to_string());
+
+    let config = AuthConfig::new()
+        .token_lifetime(Duration::from_secs(3600))
+        .refresh_token_lifetime(Duration::from_secs(86400 * 7))
+        .secret(jwt_secret);
+
+    // Create the auth framework (storage is handled internally)
+    let mut auth = AuthFramework::new(config);
+
+    // Register the JWT method marker. AuthFramework validates JWTs with the
+    // configured TokenManager when `authenticate("jwt", ...)` is called.
+    auth.register_method("jwt", AuthMethodEnum::Jwt(JwtMethod::new()));
+
+    // Initialize the framework
+    auth.initialize().await?;
+
+    // Create a JWT token for testing
+    let token = auth.create_auth_token(
+        "user123",
+        vec!["read".to_string(), "write".to_string()],
+        "jwt",
+        None,
+    ).await?;
+
+    // Validate the token
+    if auth.validate_token(&token).await? {
+        println!("Token is valid!");
+
+        // Check permissions
+        if auth.check_permission(&token, "read", "documents").await? {
+            println!("User has permission to read documents");
+        }
+    }
+
+    Ok(())
+}
+
+## cargo build exit=0 (RUSTC_WRAPPER= set: local sccache faulted first time, unrelated to the crate)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.59s
+(dependency Compiling lines elided; first full build compiled 463 locked packages)
+
+## cargo run exit=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.24s
+     Running `target\debug\qs.exe`
+Token is valid!
+
+## Cargo.lock
+name = "auth-framework"
+version = "0.6.0-rc217"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+=== RUN B: Cargo.toml EXACTLY as README says (auth-framework = "0.6.0-rc85") ===
+    Updating crates.io index
+error: failed to select a version for the requirement `auth-framework = "^0.6.0-rc85"`
+  version 0.6.0-rc85 is yanked
+  version 0.6.0-rc92 is yanked
+  version 0.6.0-rc97 is yanked
+  version 0.6.0-rc98 is yanked
+location searched: crates.io index
+required by package `qs85 v0.1.0 (<local path removed>)`
+exit=101
